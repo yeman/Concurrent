@@ -20,8 +20,8 @@ public class SyncCal {
             total += 1;
             System.out.println("线程" + Thread.currentThread().getName() + " i=" + i);
         }
-        System.out.println("共计" + Thread.currentThread().getName() + " total=" + total);
-        System.out.println(Thread.currentThread().getName() + " inc耗时" + Duration.between(start, Instant.now()).toMillis());
+        System.out.println("线程"+Thread.currentThread().getName()+"共计"  + " total=" + total);
+        System.out.println("线程"+Thread.currentThread().getName() + " inc耗时" + Duration.between(start, Instant.now()).toMillis());
 
     }
 
