@@ -1,6 +1,6 @@
 package com.yjt.concurrent.multithread.day01;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -61,7 +61,7 @@ public class TestCal {
     @Test
     public void syncalIncTest() throws InterruptedException {
         final SyncCal cal = new SyncCal();
-        Thread[] threads = new Thread[3];
+        Thread[] threads = new Thread[5];
         for (int i=0;i<threads.length;i++) {
           threads[i] = new Thread(()->{
               cal.inc();
@@ -75,7 +75,7 @@ public class TestCal {
     @Test
     public void syncalincsyncTest() throws InterruptedException {
         SyncCal cal = new SyncCal();
-        Thread[] threads = new Thread[3];
+        Thread[] threads = new Thread[5];
         for (int i=0;i<threads.length;i++) {
             threads[i] = new Thread(()->{
                 cal.incsync();
@@ -83,5 +83,58 @@ public class TestCal {
         }
         Arrays.stream(threads).forEach(Thread::start);
         TimeUnit.SECONDS.sleep(1);
+    }
+
+    //单个对象多个线程
+    @Test
+    public void singleObjectMutilThread() throws InterruptedException {
+        P1 p = new P1();
+        Thread a = new Thread(()->{
+            p.login("a");
+        });
+        Thread b = new Thread(()->{
+            p.login("b");
+        });
+        b.start();
+        a.start();
+        TimeUnit.SECONDS.sleep(5);
+    }
+    //多个对象多个线程
+    @Test
+    public void mutilObjectMutilThread() throws InterruptedException {
+        P1 p1 = new P1();
+        P1 p2 = new P1();
+        Thread a = new Thread(()->{
+            p1.login("a");
+        });
+        Thread b = new Thread(()->{
+            p1.login("b");
+        });
+        b.start();
+        a.start();
+
+        TimeUnit.SECONDS.sleep(5);
+    }
+
+    //锁性能测试
+    @Test
+    public void  testPerformance() throws InterruptedException {
+        SyncPerformance syncPerformance = new SyncPerformance();
+        Thread[] threads = new Thread[6];
+        for (int i = 0; i < 6; i++) {
+            threads[i] = new Thread(()->{
+                syncPerformance.cal();
+            },("i"+i));
+        }
+        Arrays.stream(threads).forEach(Thread::start);
+
+        Thread[] syncthreads = new Thread[6];
+        for (int j = 0; j < 6; j++) {
+            syncthreads[j] = new Thread(()->{
+                syncPerformance.syncal();
+            },("j"+j));
+        }
+        Arrays.stream(syncthreads).forEach(Thread::start);
+        TimeUnit.SECONDS.sleep(5);
     }
 }
