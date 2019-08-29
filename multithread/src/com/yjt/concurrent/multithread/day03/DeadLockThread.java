@@ -11,31 +11,33 @@ public class DeadLockThread implements Runnable {
 
     @Override
     public void run() {
-        if (userName.equals("a")){
-            synchronized (lock1){
+        if (userName.equals("a")) {
+            synchronized (lock1) {
                 try {
-                    System.out.println(Thread.currentThread().getName()+" userName="+userName);
+                    System.out.println(Thread.currentThread().getName() + " userName=" + userName);
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                synchronized (lock2) {
+                    System.out.println(Thread.currentThread().getName() + " 按照 lock1 -> lock2 执行");
+                }
             }
-            synchronized (lock2){
-                System.out.println(Thread.currentThread().getName() + " 按照 lock1 -> lock2 执行");
-            }
+
         }
-        if (userName.equals("b")){
-            synchronized (lock2){
+        if (userName.equals("b")) {
+            synchronized (lock2) {
                 try {
-                    System.out.println(Thread.currentThread().getName()+" userName="+userName);
+                    System.out.println(Thread.currentThread().getName() + " userName=" + userName);
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                synchronized (lock1) {
+                    System.out.println(Thread.currentThread().getName() + " 按照 lock2 -> lock1 执行");
+                }
             }
-            synchronized (lock1){
-                System.out.println(Thread.currentThread().getName()+" 按照 lock2 -> lock1 执行");
-            }
+
         }
     }
 }
