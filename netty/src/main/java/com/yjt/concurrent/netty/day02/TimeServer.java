@@ -11,6 +11,7 @@ package com.yjt.concurrent.netty.day02;
 public class TimeServer {
     public static void main(String[] args){
         int port = 8080;
+        final String host = "127.0.0.1";
         if(args!=null && args.length>0){
             try {
                 port = Integer.parseInt(args[0]);
@@ -18,7 +19,7 @@ public class TimeServer {
                 e.printStackTrace();
             }
         }
-        MultiPlexerTimeServer server = new MultiPlexerTimeServer(port);
+        MultiPlexerTimeServer server = new MultiPlexerTimeServer(host,port);
         new Thread(server,"NIO-MultiPlexerTimeServer-0001").start();
     }
 }
