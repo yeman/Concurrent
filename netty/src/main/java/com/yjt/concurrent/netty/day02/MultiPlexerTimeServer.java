@@ -76,13 +76,13 @@ public class MultiPlexerTimeServer implements Runnable{
                         e.printStackTrace();
                     }
                     //如果多路复用器关闭关闭后,所有注册在上面的Channel和pipe等资源都会自动的去掉注册,所以不用重复的关闭资源
-                    if(selector!=null){
+                   /* if(selector!=null){
                         try {
                             selector.close();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                    }
+                    }*/
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -93,9 +93,11 @@ public class MultiPlexerTimeServer implements Runnable{
     private void handlerInput(SelectionKey selectionKey) throws IOException {
         //处理新接入的请求消息
         if(selectionKey.isValid()){
-           ServerSocketChannel serverSocketChannel = (ServerSocketChannel) selectionKey.channel();
-           SocketChannel sc = serverSocketChannel.accept();
+            // Accept the new connection
+           ServerSocketChannel ssc = (ServerSocketChannel) selectionKey.channel();
+           SocketChannel sc = ssc.accept();
            sc.configureBlocking(false);
+           // Add the new connection to the selector
            sc.register(selector,SelectionKey.OP_READ);
         }
         if(selectionKey.isReadable()){
@@ -123,14 +125,14 @@ public class MultiPlexerTimeServer implements Runnable{
 
     }
 
-    private void writeToClient(SocketChannel sc, String resp) throws IOException {
+    private void writeToClient(SocketChannel channel, String resp) throws IOException {
         if(resp!=null && resp.trim().length()>0){
             byte[] respBytes = resp.getBytes();
             ByteBuffer byteBuffer = ByteBuffer.allocate(respBytes.length);
             byteBuffer.put(respBytes);
             byteBuffer.flip();
             //忽略写半包的场景
-            sc.write(byteBuffer);
+            channel.write(byteBuffer);
         }
     }
 

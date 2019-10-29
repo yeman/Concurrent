@@ -1,5 +1,7 @@
 package com.yjt.concurrent.netty.day02;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @ClassName TimeServer
  * @Description TODO
@@ -9,7 +11,7 @@ package com.yjt.concurrent.netty.day02;
  * @Date: 2019-10-22 12:58
  **/
 public class TimeServer {
-    public static void main(String[] args){
+    public static void main(String[] args) throws InterruptedException {
         int port = 8080;
         final String host = "127.0.0.1";
         if(args!=null && args.length>0){
@@ -21,5 +23,6 @@ public class TimeServer {
         }
         MultiPlexerTimeServer server = new MultiPlexerTimeServer(host,port);
         new Thread(server,"NIO-MultiPlexerTimeServer-0001").start();
+        Thread.sleep(TimeUnit.SECONDS.toSeconds(50));
     }
 }
