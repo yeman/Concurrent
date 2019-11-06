@@ -1,7 +1,5 @@
 package com.yjt.concurrent.netty.day04;
 
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 

@@ -6,6 +6,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.ServerSocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 /**
  * TODO
@@ -21,7 +22,7 @@ public class TimeServer {
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         try {
             serverBootstrap.group(parentLoopGroup, childLoopGroup)
-                    .channel(ServerSocketChannel.class)
+                    .channel(NioServerSocketChannel.class)
                     .option(ChannelOption.SO_BACKLOG, 1024)
                     .childHandler(new ChildChannelHandler());
             //绑定端口,同步等待成功
