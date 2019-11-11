@@ -1,0 +1,10 @@
+syntax = "proto3";
+package netty;
+option java_package = "com.yjt.concurrent.netty.day07.googleprotobuf.bean";
+option java_outer_classname = "SubscribeRsp";
+
+message SubscribeRspBean {
+    int32 subSeqId = 1;
+    int32 respCode = 2;
+    string desc = 3;
+}

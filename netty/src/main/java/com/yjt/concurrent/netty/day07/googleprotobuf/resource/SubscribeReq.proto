@@ -1,0 +1,11 @@
+syntax = "proto3";
+package netty;
+option java_package = "com.yjt.concurrent.netty.day07.googleprotobuf.bean";
+option java_outer_classname = "SubscribeReq";
+
+message SubscribeReqBean {
+    int32 subSeqId = 1;
+    string userName = 2;
+    string productName = 3;
+    string address = 4;
+}
