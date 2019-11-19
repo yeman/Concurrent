@@ -1,0 +1,18 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://yjt.com/concurrent/netty/day09/bean" elementFormDefault="qualified" targetNamespace="http://yjt.com/concurrent/netty/day09/bean">
+  <xs:element type="tns:address" name="address"/>
+  <xs:complexType name="address">
+    <xs:sequence>
+      <xs:element type="xs:string" name="contactAddress" minOccurs="0"/>
+      <xs:element type="xs:string" name="homeAddress" minOccurs="0"/>
+      <xs:element type="xs:string" name="companyAddress" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="person">
+    <xs:sequence>
+      <xs:element type="xs:string" name="name" minOccurs="0"/>
+      <xs:element type="tns:address" name="address" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute type="xs:long" use="required" name="id"/>
+  </xs:complexType>
+  <xs:element type="tns:person" name="person"/>
+</xs:schema>

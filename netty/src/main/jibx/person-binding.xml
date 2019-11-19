@@ -1,0 +1,19 @@
+<binding xmlns:ns1="http://yjt.com/concurrent/netty/day09/bean" name="binding" package="com.yjt.concurrent.netty.day09.bean">
+  <namespace uri="http://yjt.com/concurrent/netty/day09/bean" default="elements"/>
+  <mapping abstract="true" type-name="ns1:person" class="com.yjt.concurrent.netty.day09.bean.Person">
+    <value style="attribute" name="id" field="id"/>
+    <value style="element" name="name" field="name" usage="optional"/>
+    <structure map-as="ns1:address" field="address" usage="optional" name="address"/>
+  </mapping>
+  <mapping class="com.yjt.concurrent.netty.day09.bean.Person" name="person">
+    <structure map-as="ns1:person"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:address" class="com.yjt.concurrent.netty.day09.bean.Address">
+    <value style="element" name="contactAddress" field="contactAddress" usage="optional"/>
+    <value style="element" name="homeAddress" field="homeAddress" usage="optional"/>
+    <value style="element" name="companyAddress" field="companyAddress" usage="optional"/>
+  </mapping>
+  <mapping class="com.yjt.concurrent.netty.day09.bean.Address" name="address">
+    <structure map-as="ns1:address"/>
+  </mapping>
+</binding>
