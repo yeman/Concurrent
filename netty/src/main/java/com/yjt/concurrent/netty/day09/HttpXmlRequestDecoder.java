@@ -22,7 +22,7 @@ public class HttpXmlRequestDecoder extends AbstractHttpXmlDecoder<FullHttpReques
     }
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, FullHttpRequest msg, List<Object> out) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, FullHttpRequest msg, List<Object> out) throws Exception {
         if(!msg.decoderResult().isSuccess()){
             sendError(ctx,HttpResponseStatus.BAD_REQUEST);
             return;

@@ -21,7 +21,7 @@ import io.netty.handler.codec.http.HttpResponseDecoder;
  */
 public class HttpClient {
 
-    public void connect(final String host, int port) {
+    public void connect(String host,int port) {
         NioEventLoopGroup group = new NioEventLoopGroup();
         try {
             Bootstrap bootstrap = new Bootstrap();
@@ -39,7 +39,7 @@ public class HttpClient {
                                     .addLast("client->httpxmlClienthandler", new HttpXmlClientHandler());
                         }
                     });
-            ChannelFuture channelFuture = bootstrap.connect(host, port).sync();
+            ChannelFuture channelFuture = bootstrap.connect(host,port).sync();
             channelFuture.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -50,9 +50,9 @@ public class HttpClient {
     }
 
     public static void main(String[] args) {
-        int port = 8080;
-        String host = "127.0.0.1";
+        final int port = 8080;
+        final String host = "127.0.0.1";
         HttpClient client = new HttpClient();
-        client.connect(host, port);
+        client.connect(host,port);
     }
 }

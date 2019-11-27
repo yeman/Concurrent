@@ -31,7 +31,8 @@ public class HttpXmlRequest {
         return body;
     }
 
-    public void setBody(Object body) {
+    public final void setBody(Object body) {
         this.body = body;
     }
+
 }

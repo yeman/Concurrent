@@ -2,7 +2,7 @@ package com.yjt.concurrent.netty.day09;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToMessageEncoder;
+import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.util.CharsetUtil;
 import org.jibx.runtime.BindingDirectory;
 import org.jibx.runtime.IBindingFactory;
@@ -17,7 +17,7 @@ import java.io.StringReader;
  * author Administrator
  * version V1.0
  */
-public abstract class AbstractHttpXmlDecoder<T> extends MessageToMessageEncoder<T> {
+public abstract class AbstractHttpXmlDecoder<T> extends MessageToMessageDecoder<T> {
     private Class<?> clz ;
     private StringReader stringReader;
     private IBindingFactory bindingFactory;
@@ -26,13 +26,13 @@ public abstract class AbstractHttpXmlDecoder<T> extends MessageToMessageEncoder<
         this.clz = clz;
     }
 
-    protected  T decodeXml(ChannelHandlerContext chc, ByteBuf body) throws Exception {
+    protected  Object decodeXml(ChannelHandlerContext chc, ByteBuf body) throws Exception {
         bindingFactory =  BindingDirectory.getFactory(clz);
         IUnmarshallingContext unmarshallingContext = bindingFactory.createUnmarshallingContext();
         String inputXml = body.toString(CharsetUtil.UTF_8);
         System.out.println("-->xml:"+ inputXml);
         stringReader = new StringReader(inputXml);
-        T object =  (T)unmarshallingContext.unmarshalDocument(stringReader,null);
+        Object object =  unmarshallingContext.unmarshalDocument(stringReader,null);
         stringReader.close();
         stringReader = null;
         return object;

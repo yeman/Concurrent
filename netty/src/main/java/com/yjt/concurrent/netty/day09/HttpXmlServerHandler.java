@@ -39,7 +39,7 @@ public class HttpXmlServerHandler extends SimpleChannelInboundHandler<HttpXmlReq
         System.out.println("服务器收到 <---:"+ person);
         doBusiness(person);
         ChannelFuture channelFuture = ctx.writeAndFlush(new HttpXmlResponse(null,person));
-        if(HttpUtil.isKeepAlive(request)){
+        if(!HttpUtil.isKeepAlive(request)){
             channelFuture.addListener(new GenericFutureListener<Future<? super Void>>() {
                 @Override
                 public void operationComplete(Future<? super Void> future) throws Exception {

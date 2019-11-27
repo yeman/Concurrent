@@ -20,7 +20,7 @@ public class HttpXmlResponseDecoder extends AbstractHttpXmlDecoder<DefaultFullHt
     }
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, DefaultFullHttpResponse msg, List<Object> out) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, DefaultFullHttpResponse msg, List<Object> out) throws Exception {
         HttpXmlResponse response = new HttpXmlResponse(msg, decodeXml(ctx, msg.content()));
         out.add(response);
     }

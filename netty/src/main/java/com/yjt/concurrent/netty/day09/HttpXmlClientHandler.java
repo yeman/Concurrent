@@ -18,12 +18,14 @@ public class HttpXmlClientHandler extends SimpleChannelInboundHandler<HttpXmlRes
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         Person person = buildRequestObject();
         HttpXmlRequest request = new HttpXmlRequest(null, person);
+        System.out.println("发起请求:" + request.toString());
         ctx.writeAndFlush(request);
+
     }
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, HttpXmlResponse msg) throws Exception {
-        System.out.println("客户端收到响应:"+ msg);
+        System.out.println("客户端收到响应:" + msg);
     }
 
     private Person buildRequestObject() {

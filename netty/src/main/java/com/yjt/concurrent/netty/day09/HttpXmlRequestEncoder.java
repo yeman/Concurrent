@@ -17,19 +17,20 @@ import java.util.List;
 public class HttpXmlRequestEncoder extends AbstractHttpXmlEncoder<HttpXmlRequest>{
     @Override
     protected void encode(ChannelHandlerContext ctx, HttpXmlRequest msg, List out) throws Exception {
-        ByteBuf byteBuf = encodeObject(ctx,msg);
+        ByteBuf byteBuf = encodeObject(ctx,msg.getBody());
         FullHttpRequest httpRequest = msg.getHttpRequest();
         if(httpRequest ==null){
-            httpRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET,"/xml",byteBuf);
-            httpRequest.headers().set(HttpHeaderNames.HOST, InetAddress.getLocalHost().getHostAddress())
+            httpRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET,"/do",byteBuf);
+            HttpHeaders httpHeaders = httpRequest.headers();
+            httpHeaders.set(HttpHeaderNames.HOST, InetAddress.getLocalHost().getHostAddress())
                                  .set(HttpHeaderNames.CONNECTION,HttpHeaderValues.CLOSE)
                                  .set(HttpHeaderNames.ACCEPT_ENCODING,HttpHeaderValues.GZIP_DEFLATE)
                                  .set(HttpHeaderNames.ACCEPT_CHARSET,"ISO-8859-1,utf-8;q=0.7,*;q=0.7")
                                 .set(HttpHeaderNames.ACCEPT_LANGUAGE,"zh")
                                 .set(HttpHeaderNames.USER_AGENT,"Netty xml")
-                                .set(HttpHeaderNames.ACCEPT,"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-                    .set(HttpHeaderNames.CONTENT_LENGTH,byteBuf.readableBytes());
-            out.add(msg);
+                                .set(HttpHeaderNames.ACCEPT,"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+            HttpUtil.setContentLength(httpRequest,byteBuf.readableBytes());
+            out.add(httpRequest);
 
         }
     }
