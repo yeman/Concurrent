@@ -29,6 +29,7 @@ public abstract class AbstractHttpXmlEncoder<T> extends MessageToMessageEncoder<
         stringWriter = new StringWriter();
         marshallingContext.marshalDocument(body,CharsetUtil.UTF_8.name(),null,stringWriter);
         String xml = stringWriter.toString();
+        System.out.println("服务器端加密成byteBuf前xml:\t"+xml);
         stringWriter.close();
         stringWriter = null;
         ByteBuf byteBuf = Unpooled.copiedBuffer(xml,CharsetUtil.UTF_8);

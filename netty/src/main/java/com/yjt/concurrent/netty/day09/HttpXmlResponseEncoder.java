@@ -21,7 +21,6 @@ public class HttpXmlResponseEncoder extends AbstractHttpXmlEncoder<HttpXmlRespon
         FullHttpResponse httpResponse = msg.getHttpResponse();
         if(httpResponse ==null){
             httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,HttpResponseStatus.OK,body);
-
         }else{
             httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,msg.getHttpResponse().status(),body);
         }

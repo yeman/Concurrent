@@ -4,6 +4,7 @@ import com.yjt.concurrent.netty.day09.bean.Person;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -29,18 +30,18 @@ public class HttpServer {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             serverBootstrap.group(main, work)
                     .channel(NioServerSocketChannel.class)
-                    //.option(ChannelOption.SO_BACKLOG, 1024)
-                    //.option(ChannelOption.TCP_NODELAY, true)
+                    .option(ChannelOption.SO_BACKLOG, 1024)
+                    .option(ChannelOption.TCP_NODELAY, true)
                     .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast("server->httpRequstDecoder", new HttpRequestDecoder())
-                                    .addLast("server->httpObjectAggregator", new HttpObjectAggregator(65536))
-                                    .addLast("server->httpXmlRequestDecoder", new HttpXmlRequestDecoder(Person.class))
-                                    .addLast("server->httpReponseEncoder", new HttpResponseEncoder())
-                                    .addLast("server->httpXmlReponseEncoder", new HttpXmlResponseEncoder())
-                                    .addLast("server->httpXmlServerHandler", new HttpXmlServerHandler());
+                            ch.pipeline().addLast(new HttpRequestDecoder())
+                                    .addLast(new HttpObjectAggregator(65536))
+                                    .addLast(new HttpXmlRequestDecoder(Person.class))
+                                    .addLast(new HttpResponseEncoder())
+                                    .addLast(new HttpXmlResponseEncoder())
+                                    .addLast(new HttpXmlServerHandler());
 
                         }
                     });

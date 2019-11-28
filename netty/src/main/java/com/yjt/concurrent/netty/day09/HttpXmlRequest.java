@@ -35,4 +35,11 @@ public class HttpXmlRequest {
         this.body = body;
     }
 
+    @Override
+    public String toString() {
+        return "HttpXmlRequest{" +
+                "httpRequest=" + httpRequest +
+                ", body=" + body +
+                '}';
+    }
 }

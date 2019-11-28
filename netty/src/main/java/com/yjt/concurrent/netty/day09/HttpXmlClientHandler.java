@@ -25,7 +25,7 @@ public class HttpXmlClientHandler extends SimpleChannelInboundHandler<HttpXmlRes
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, HttpXmlResponse msg) throws Exception {
-        System.out.println("客户端收到响应:" + msg);
+        System.out.println("客户端收到响应:" + msg.getResult());
     }
 
     private Person buildRequestObject() {

@@ -36,7 +36,7 @@ public class HttpXmlServerHandler extends SimpleChannelInboundHandler<HttpXmlReq
     protected void channelRead0(ChannelHandlerContext ctx, HttpXmlRequest msg) throws Exception {
         HttpRequest request = msg.getHttpRequest();
         Person person = (Person) msg.getBody();
-        System.out.println("服务器收到 <---:"+ person);
+        System.out.println("HttpXmlServerHandler 解码成bean:\t"+ person);
         doBusiness(person);
         ChannelFuture channelFuture = ctx.writeAndFlush(new HttpXmlResponse(null,person));
         if(!HttpUtil.isKeepAlive(request)){

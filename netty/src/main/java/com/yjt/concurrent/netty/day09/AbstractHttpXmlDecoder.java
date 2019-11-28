@@ -30,7 +30,7 @@ public abstract class AbstractHttpXmlDecoder<T> extends MessageToMessageDecoder<
         bindingFactory =  BindingDirectory.getFactory(clz);
         IUnmarshallingContext unmarshallingContext = bindingFactory.createUnmarshallingContext();
         String inputXml = body.toString(CharsetUtil.UTF_8);
-        System.out.println("-->xml:"+ inputXml);
+        System.out.println("AbstractHttpXmlDecoder解码xml the body is\t:"+ inputXml);
         stringReader = new StringReader(inputXml);
         Object object =  unmarshallingContext.unmarshalDocument(stringReader,null);
         stringReader.close();

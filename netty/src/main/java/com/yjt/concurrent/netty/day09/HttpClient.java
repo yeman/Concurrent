@@ -21,7 +21,7 @@ import io.netty.handler.codec.http.HttpResponseDecoder;
  */
 public class HttpClient {
 
-    public void connect(String host,int port) {
+    public void connect(String host, int port) {
         NioEventLoopGroup group = new NioEventLoopGroup();
         try {
             Bootstrap bootstrap = new Bootstrap();
@@ -31,15 +31,16 @@ public class HttpClient {
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast("client->responseDecoder", new HttpResponseDecoder())
-                                    .addLast("client->objectAggregator", new HttpObjectAggregator(65536))
-                                    .addLast("client->httpxmlReponseDecoder", new HttpXmlResponseDecoder(Person.class))
-                                    .addLast("client->httpRequestEncoder", new HttpRequestEncoder())
-                                    .addLast("client->httpxmlRequestEncoder", new HttpXmlRequestEncoder())
-                                    .addLast("client->httpxmlClienthandler", new HttpXmlClientHandler());
+                            ch.pipeline().addLast( new HttpResponseDecoder())
+                                    .addLast( new HttpObjectAggregator(65536))
+                                    .addLast( new HttpXmlResponseDecoder(Person.class))
+                                    .addLast( new HttpRequestEncoder())
+                                    .addLast( new HttpXmlRequestEncoder())
+                                    .addLast(new HttpXmlClientHandler());
+
                         }
                     });
-            ChannelFuture channelFuture = bootstrap.connect(host,port).sync();
+            ChannelFuture channelFuture = bootstrap.connect(host, port).sync();
             channelFuture.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -53,6 +54,6 @@ public class HttpClient {
         final int port = 8080;
         final String host = "127.0.0.1";
         HttpClient client = new HttpClient();
-        client.connect(host,port);
+        client.connect(host, port);
     }
 }
