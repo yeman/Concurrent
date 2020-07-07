@@ -4,6 +4,8 @@ import com.yjt.concurrent.netty.day09.bean.Address;
 import com.yjt.concurrent.netty.day09.bean.Person;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpResponse;
 
 /**
  * TODO
@@ -12,7 +14,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
  * author Administrator
  * version V1.0
  */
-public class HttpXmlClientHandler extends SimpleChannelInboundHandler<HttpXmlResponse> {
+public class HttpXmlClientHandler extends SimpleChannelInboundHandler<DefaultFullHttpResponse> {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -24,8 +26,8 @@ public class HttpXmlClientHandler extends SimpleChannelInboundHandler<HttpXmlRes
     }
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, HttpXmlResponse msg) throws Exception {
-        System.out.println("客户端收到响应:" + msg.getResult());
+    public void channelRead0(ChannelHandlerContext ctx, DefaultFullHttpResponse msg) throws Exception {
+        System.out.println("客户端收到响应:" + msg);
     }
 
     private Person buildRequestObject() {

@@ -14,6 +14,8 @@ import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
+import java.net.InetSocketAddress;
+
 /**
  * TODO
  * ClassName: HttpServer
@@ -30,13 +32,14 @@ public class HttpServer {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             serverBootstrap.group(main, work)
                     .channel(NioServerSocketChannel.class)
-                    .option(ChannelOption.SO_BACKLOG, 1024)
-                    .option(ChannelOption.TCP_NODELAY, true)
-                    .handler(new LoggingHandler(LogLevel.INFO))
+                    .option(ChannelOption.SO_BACKLOG,1024)
+                    .childOption(ChannelOption.SO_KEEPALIVE,true)
+                    .handler(new LoggingHandler(LogLevel.DEBUG))
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(new HttpRequestDecoder())
+                            ch.pipeline()
+                                    .addLast(new HttpRequestDecoder())
                                     .addLast(new HttpObjectAggregator(65536))
                                     .addLast(new HttpXmlRequestDecoder(Person.class))
                                     .addLast(new HttpResponseEncoder())
@@ -45,7 +48,7 @@ public class HttpServer {
 
                         }
                     });
-            ChannelFuture channelFuture = serverBootstrap.bind(port).sync();
+            ChannelFuture channelFuture = serverBootstrap.bind(new InetSocketAddress(port)).sync();
             channelFuture.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             e.printStackTrace();

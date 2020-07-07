@@ -11,6 +11,10 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestEncoder;
 import io.netty.handler.codec.http.HttpResponseDecoder;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
+
+import java.net.InetSocketAddress;
 
 /**
  * TODO
@@ -31,7 +35,8 @@ public class HttpClient {
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast( new HttpResponseDecoder())
+                            ch.pipeline()
+                                    .addLast( new HttpResponseDecoder())
                                     .addLast( new HttpObjectAggregator(65536))
                                     .addLast( new HttpXmlResponseDecoder(Person.class))
                                     .addLast( new HttpRequestEncoder())
@@ -40,7 +45,7 @@ public class HttpClient {
 
                         }
                     });
-            ChannelFuture channelFuture = bootstrap.connect(host, port).sync();
+            ChannelFuture channelFuture = bootstrap.connect(new InetSocketAddress(port)).sync();
             channelFuture.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             e.printStackTrace();

@@ -30,3 +30,7 @@ java -cp F:\jibx_1_3_1\jibx\lib\jibx-bind.jar org.jibx.binding.Compile -v E:\ide
 2.1对字节码增强的第二种方法
 
  执行maven install即可增强class文件 
+
+
+
+**3  httpxml客户端响应问题排查**
