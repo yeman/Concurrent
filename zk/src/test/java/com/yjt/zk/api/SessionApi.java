@@ -1,28 +1,26 @@
 package com.yjt.zk.api;
 
-import cn.hutool.json.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.log4j.Log4j2;
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.IZkDataListener;
 import org.I0Itec.zkclient.ZkClient;
-import org.I0Itec.zkclient.ZkConnection;
 import org.I0Itec.zkclient.serialize.SerializableSerializer;
 import org.I0Itec.zkclient.serialize.ZkSerializer;
+import org.apache.commons.lang.StringUtils;
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
-import org.apache.zookeeper.data.Stat;
+import org.apache.zookeeper.server.auth.DigestAuthenticationProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.security.acl.Acl;
-import java.sql.Time;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -34,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  * @since 1.0
  **/
 @Log4j2
-public class SessionApi {
+public class SessionApi implements Watcher {
 
 
     private String zkServers;
@@ -48,24 +46,20 @@ public class SessionApi {
     private ZkClient client;
 
     private ZooKeeper zooKeeper;
-    private final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+    @Override
+    public void process(WatchedEvent event) {
+        log.info("process path {}, state {}", event.getPath(), event.getState());
+    }
 
     @Before
-    public void init() throws IOException {
+    public void init() throws IOException, InterruptedException {
         zkServers = "127.0.0.1:2181,127.0.0.1:2182,127.0.0.1:2183";
-        sessionTimeout = 10000;
-        connectionTimeout = 10000;
+        sessionTimeout = 20000;
+        connectionTimeout = 30000;
         zkSerializer = new SerializableSerializer();
-        client =new ZkClient(zkServers,sessionTimeout,connectionTimeout,zkSerializer);
-        zooKeeper = new ZooKeeper(zkServers, sessionTimeout, new Watcher() {
-            @Override
-            public void process(WatchedEvent event) {
-                log.info("process path {}, state {}",event.getPath(),event.getState());
-                if (event.getState() == Event.KeeperState.SyncConnected) {
-                    countDownLatch.countDown();
-                }
-            }
-        });
+        client = new ZkClient(zkServers, sessionTimeout, connectionTimeout, zkSerializer);
+        zooKeeper = new ZooKeeper(zkServers, sessionTimeout, this);
     }
 
     @After
@@ -164,36 +158,138 @@ public class SessionApi {
         TimeUnit.SECONDS.sleep(10);
     }
 
+    /**
+     * @description word anyone 方式
+     * @author YM
+     * @date 2020/7/8 8:38
+     * @param
+     * @return void
+     */
     @Test
     public void testAcl() throws KeeperException, InterruptedException {
-        if(!client.exists("/test02")){
+        if (!client.exists("/test02")) {
             client.createPersistent("/test02");
         }
-
-        zooKeeper.addAuthInfo("digest","admin:root".getBytes());
-        zooKeeper.create("/test02/server1","192.168.0.1".getBytes(),ZooDefs.Ids.OPEN_ACL_UNSAFE,CreateMode.PERSISTENT);
+        zooKeeper.create("/test02/server1", "192.168.0.1".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
         TimeUnit.SECONDS.sleep(5);
         List<ACL> aclList = zooKeeper.getACL("/test02/server1", null);
-        log.info("acl list {}",aclList);
-
-        byte[] data = zooKeeper.getData("/test02/server1", new Watcher() {
-            @Override
-            public void process(WatchedEvent event) {
-                log.info("node path {},state {},event type{}",event.getPath(),event.getState(),event.getType());
-            }
-        },null);
-        log.info("res data -> {}",new String(data));
+        log.info("acl list {}", aclList);
         TimeUnit.SECONDS.sleep(10);
     }
 
+    /**
+     * @description ip方式
+     * @author YM
+     * @date 2020/7/8 8:39
+     * @param
+     * @return void
+     */
     @Test
-    public void testPermission() throws KeeperException, InterruptedException {
-        byte[] data = zooKeeper.getData("/test02/server1", new Watcher() {
+    public void testAclIp() throws KeeperException, InterruptedException {
+        if (!client.exists("/test02")) {
+            client.createPersistent("/test02");
+        }
+        ACL acl = new ACL(ZooDefs.Perms.ALL, new Id("ip", "10.78.210.123"));
+        ACL acl2 = new ACL(ZooDefs.Perms.ALL, new Id("ip", "127.0.0.1"));
+        String res = zooKeeper.create("/test02/server3", "192.168.0.1".getBytes(), Arrays.asList(acl, acl2), CreateMode.PERSISTENT);
+        if(StringUtils.isNotBlank(res)){
+            log.info("节点{}创建成功!",res);
+        }
+        TimeUnit.SECONDS.sleep(2);
+        List<ACL> aclList = zooKeeper.getACL("/test02/server3", null);
+        log.info("acl list {}", aclList);
+        // NoAuth for /test02/server3
+        //zooKeeper.addAuthInfo("ip","10.78.210.123".getBytes());
+        byte[] data = zooKeeper.getData("/test02/server3", new Watcher() {
             @Override
             public void process(WatchedEvent event) {
-                log.info("node path {},state {},event type{}",event.getPath(),event.getState(),event.getType());
+                log.info("node path {},state {},event type{}", event.getPath(), event.getState(), event.getType());
             }
-        },null);
-        log.info("res data -> {}",new String(data));
+        }, null);
+        log.info("res data -> {}", new String(data));
+        TimeUnit.SECONDS.sleep(10);
     }
+
+    /**
+     * @description 明文Auth
+     * @author YM
+     * @date 2020/7/8 8:39
+     * @param
+     * @return void
+     */
+    @Test
+    public void testAclAuth() throws KeeperException, InterruptedException {
+        zooKeeper.addAuthInfo("digest","admin:root".getBytes());
+        zooKeeper.create("/test02/server5", "明文".getBytes(),  ZooDefs.Ids.CREATOR_ALL_ACL, CreateMode.PERSISTENT);
+        TimeUnit.SECONDS.sleep(2);
+        // NoAuth
+        byte[] data = zooKeeper.getData("/test02/server5", new Watcher() {
+            @Override
+            public void process(WatchedEvent event) {
+                log.info("node path {},state {},event type{}", event.getPath(), event.getState(), event.getType());
+            }
+        }, null);
+        log.info(">> data {}",new String(data));
+        TimeUnit.SECONDS.sleep(2);
+    }
+
+
+    @Test
+    public void testAclAuthVisit() throws KeeperException, InterruptedException {
+        zooKeeper.addAuthInfo("digest", "admin:root".getBytes());
+        byte[] data = zooKeeper.getData("/test02/server5", new Watcher() {
+            @Override
+            public void process(WatchedEvent event) {
+                log.info("node path {},state {},event type{}", event.getPath(), event.getState(), event.getType());
+            }
+        }, null);
+        log.info("res data -> {}", new String(data));
+        TimeUnit.SECONDS.sleep(5);
+    }
+
+     public String digest(String idPassword) throws NoSuchAlgorithmException {
+        return DigestAuthenticationProvider.generateDigest(idPassword);
+     }
+
+     @Test
+    public void testAclDigest() throws KeeperException, InterruptedException, NoSuchAlgorithmException {
+         if (!client.exists("/test03")) {
+             client.createPersistent("/test03");
+         }
+        List<ACL> aclList = new ArrayList<ACL>();
+        Id admin= new Id("digest", digest("admin:root"));
+        Id user = new Id("digest", digest("user:user"));
+        Id owner = new Id("digest", digest("zoo:user"));
+        //管理员
+        aclList.add(new ACL(ZooDefs.Perms.ALL,admin));
+        //只读
+        aclList.add(new ACL(ZooDefs.Perms.READ,user));
+        //读写删
+        aclList.add(new ACL(ZooDefs.Perms.READ| ZooDefs.Perms.WRITE| ZooDefs.Perms.DELETE,owner));
+        zooKeeper.create("/test03/server1", "测试数据".getBytes(), aclList, CreateMode.PERSISTENT);
+        TimeUnit.SECONDS.sleep(2);
+        // TODO NoAuth for /test03/server1
+        byte[] data = zooKeeper.getData("/test03/server1", new Watcher() {
+            @Override
+            public void process(WatchedEvent event) {
+                log.info("node path {},state {},event type{}", event.getPath(), event.getState(), event.getType());
+            }
+        }, null);
+        TimeUnit.SECONDS.sleep(2);
+    }
+
+    @Test
+    public void testAclDigestVisit() throws KeeperException, InterruptedException {
+        zooKeeper.addAuthInfo("digest","zoo:user".getBytes());
+        byte[] data = zooKeeper.getData("/test03/server1", new Watcher() {
+            @Override
+            public void process(WatchedEvent event) {
+                log.info("node path {},state {},event type{}", event.getPath(), event.getState(), event.getType());
+            }
+        }, null);
+        TimeUnit.SECONDS.sleep(2);
+        log.info(">>> data {}",new String(data));
+    }
+
+
 }
