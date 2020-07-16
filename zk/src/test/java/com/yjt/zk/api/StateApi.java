@@ -4,13 +4,13 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.ACL;
-import org.apache.zookeeper.data.Id;
 import org.apache.zookeeper.data.Stat;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.sql.Time;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -38,7 +38,8 @@ public class StateApi implements Watcher {
         sessionTimeout = 20000;
     }
 
-    private void disConnection() {
+    @After
+    public void disConnection() {
         if (zooKeeper != null) {
             try {
                 zooKeeper.close();
@@ -48,12 +49,14 @@ public class StateApi implements Watcher {
         }
     }
 
-    private void createConnection() {
+    @Before
+    public void createConnection() {
         this.disConnection();
         try {
+            init();
             zooKeeper = new ZooKeeper(zkServers, sessionTimeout, this);
             log.info("开始创建连接");
-            countDownLatch.wait();
+            countDownLatch.await();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -72,6 +75,14 @@ public class StateApi implements Watcher {
         return true;
     }
 
+    private List<String> getChildren(String path, boolean watch) {
+        try {
+            return zooKeeper.getChildren(path,watch);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     public Stat writeData(@NonNull String path, @NonNull String data) {
         try {
             return zooKeeper.setData(path, data.getBytes(), Version.REVISION);
@@ -121,6 +132,50 @@ public class StateApi implements Watcher {
             return;
         }
         Event.KeeperState keeperState = event.getState();
-        event.getType()
+        Event.EventType eventType = event.getType();
+        String path = event.getPath();
+        if(Event.KeeperState.SyncConnected == keeperState){
+            if(Event.EventType.None == eventType){
+                log.info("成功连接 path={}",path);
+                countDownLatch.countDown();
+            }else if(Event.EventType.NodeCreated == eventType){
+                log.info("创建节点 path={},状态{}",path,this.exists(path,true));
+            }else if(Event.EventType.NodeDeleted == eventType){
+                log.info("节点删除 path={},状态{}",path, this.exists(path,true));
+            }else if(Event.EventType.NodeDataChanged == eventType){
+                log.info("节点数据更新 path={},成功{}",path,readData(path,true));
+            }else if(Event.EventType.NodeChildrenChanged == eventType){
+                log.info("子节点改变 path={},成功{}",path,this.getChildren(path,true));
+            }
+
+        }else if(Event.KeeperState.Disconnected == keeperState){
+            log.info("断开连接 path={}",path);
+        }else if(Event.KeeperState.AuthFailed == keeperState){
+            log.info("认证失败 path={}",path);
+        }else if(Event.KeeperState.Expired == keeperState){
+            log.info("会话失效 path={}",path);
+        }
+
     }
+
+    @Test
+    public void testState() throws InterruptedException {
+        createNode("/state01",null);
+        TimeUnit.SECONDS.sleep(2);
+        createNode("/state01/node1",null);
+        TimeUnit.SECONDS.sleep(2);
+        writeData("/state01/node1","123456");
+        TimeUnit.SECONDS.sleep(2);
+        List<String> childs = getChildren("/state01",true);
+        log.info("children {}",childs);
+        TimeUnit.SECONDS.sleep(2);
+        boolean flag = createNode("/state01/node2","678910".getBytes());
+        log.info("createNode {}",flag);
+        TimeUnit.SECONDS.sleep(2);
+        deleteNode("/state01/node1");
+        TimeUnit.SECONDS.sleep(2);
+
+    }
+
+
 }
