@@ -1,13 +1,19 @@
 package com.yjt.concurrent.multithread.day05;
 
+import cn.hutool.core.util.RandomUtil;
 import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.lang.annotation.Target;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * @className FileUploadMain
@@ -20,41 +26,49 @@ import java.util.concurrent.TimeUnit;
 @Log4j2
 public class FileUploadMain {
 
-    private  CountDownLatch count = new CountDownLatch(10);
-
     @Test
-    public void doUpload() throws InterruptedException {
-        FileUploadThread[] threads = new FileUploadThread[10];
-        for (int i = 0; i < threads.length; i++) {
-            threads[i] = new FileUploadThread(i+"");
+    public void testUpload() throws InterruptedException, ExecutionException {
+        int threads = 10;
+        ExecutorService threadPool = Executors.newCachedThreadPool();
+        CountDownLatch countDownLatch = new CountDownLatch(threads);
+        ConcurrentHashMap concurrentHashMap = new ConcurrentHashMap();
+        for (int i = 0; i < threads; i++) {
+            Future<ConcurrentHashMap> future = threadPool.submit(new DoUpload(i, countDownLatch));
+            concurrentHashMap.putAll(future.get());
         }
-        Arrays.asList(threads).stream().forEach(FileUploadThread::run);
-      /* while(count.getCount()>1){
-           log.info("主线程{}等待",Thread.currentThread().getId());
-            count.await();
-        }*/
-        log.info("所有线程执行完毕");
+        countDownLatch.await();
+        log.info("map:{}", concurrentHashMap);
     }
 
-     class FileUploadThread extends Thread {
+    class DoUpload implements Callable<ConcurrentHashMap> {
+        private int index;
+        private CountDownLatch countDownLatch;
 
-         public FileUploadThread(String name) {
-             super(name);
-         }
+        public DoUpload(int index, CountDownLatch countDownLatch) {
+            this.index = index;
+            this.countDownLatch = countDownLatch;
+        }
 
-         @Override
-        public void run() {
-            log.info("Thread {},开始文件上传", this.getName());
-            Random r = new Random();
-            int seconds = r.nextInt(1);
+        @Override
+        public ConcurrentHashMap call() {
+            ConcurrentHashMap concurrentHashMap = new ConcurrentHashMap();
+            log.info("线程{}开始上传编号{}的文件", Thread.currentThread().getName(), index);
             try {
-                log.info("Thread {},开始休眠{}s", this.getName(),seconds);
-                TimeUnit.SECONDS.sleep(seconds);
+                TimeUnit.SECONDS.sleep(ThreadLocalRandom.current().nextInt(5));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            log.info("Thread {},文件上完毕", this.getName());
-
+            log.info("上传成功");
+            concurrentHashMap.put(index, "a");
+            countDownLatch.countDown();
+            return concurrentHashMap;
         }
+    }
+
+    @Test
+    public void testDir() throws IOException {
+        Path newDirectory = FileSystems.getDefault().getPath("\\opt\\la-api\\kbao-la-api\\temp\\\\1267372633603207172");
+        Path path = Files.createDirectories(newDirectory);
+        log.info("{}创建成功", path);
     }
 }
