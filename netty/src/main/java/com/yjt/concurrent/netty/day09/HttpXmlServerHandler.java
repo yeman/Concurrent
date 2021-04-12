@@ -43,6 +43,7 @@ public class HttpXmlServerHandler extends SimpleChannelInboundHandler<HttpXmlReq
             channelFuture.addListener(new GenericFutureListener<Future<? super Void>>() {
                 @Override
                 public void operationComplete(Future<? super Void> future) throws Exception {
+                    System.out.println("#### 传输完成");
                     ctx.close();
                 }
             });
@@ -54,6 +55,8 @@ public class HttpXmlServerHandler extends SimpleChannelInboundHandler<HttpXmlReq
         person.setName("新龙门客栈");
         person.setId(10086);
         person.getAddress().setCompanyAddress("中关村");
+        person.getAddress().setContactAddress("九月九日");
+        person.getAddress().setHomeAddress("天堂寨");
     }
 
     private void sendError(ChannelHandlerContext ctx, HttpResponseStatus status) {

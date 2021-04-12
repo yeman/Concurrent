@@ -1,18 +1,12 @@
 package com.yjt.concurrent.multithread.day05;
 
-import cn.hutool.core.util.RandomUtil;
-import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.lang.annotation.Target;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Random;
 import java.util.concurrent.*;
 
 /**
@@ -23,7 +17,7 @@ import java.util.concurrent.*;
  * @version V1.0
  * @since 1.0
  **/
-@Log4j2
+@Slf4j
 public class FileUploadMain {
 
     @Test

@@ -127,7 +127,7 @@ Zab协议的核心：定义了事务请求的处理方式
 
 #### 8 消息广播
 
-1）在zookeeper集群中，数据副本的传递策略就是采用消息广播模式。zookeeper中农数据副本的同步方式与二段提交相似，但是却又不同。二段提交要求协调者必须等到所有的参与者全部反馈ACK确认消息后，再发送commit消息。要求所有的参与者要么全部成功，要么全部失败。二段提交会产生严重的阻塞问题。
+1）在zookeeper集群中，数据副本的传递策略就是采用消息广播模式。zookeeper中用数据副本的同步方式与二段提交相似，但是却又不同。二段提交要求协调者必须等到所有的参与者全部反馈ACK确认消息后，再发送commit消息。要求所有的参与者要么全部成功，要么全部失败。二段提交会产生严重的阻塞问题。
 
 2）Zab协议中 Leader 等待 Follower 的ACK反馈消息是指“只要半数以上的Follower成功反馈即可，不需要收到全部Follower反馈”
 
@@ -177,14 +177,14 @@ Zab协议的核心：定义了事务请求的处理方式
  即新选举的 Leader 必须都是已经提交了 Proposal 的 Follower 服务器节点。
  2）**新选举的 Leader 节点中含有最大的 zxid** 。
  这样做的好处是可以避免 Leader 服务器检查 Proposal 的提交和丢弃工作。
- 
+
 
 #### 11 Zab 如何数据同步
 
 1）完成 Leader 选举后（新的 Leader 具有最高的zxid），在正式开始工作之前（接收事务请求，然后提出新的 Proposal），Leader 服务器会首先确认事务日志中的所有的 Proposal 是否已经被集群中过半的服务器 Commit。
 
-2）Leader 服务器需要确保所有的 Follower 服务器能够接收到每一条事务的 Proposal ，并且能将所有已经提交的事务 Proposal 应用到内存数据中。等到 Follower 将所有尚未同步的事务 Proposal 都从 Leader 服务器上同步过啦并且应用到内存数据中以后，Leader 才会把该 Follower 加入到真正可用的 Follower 列表中。
- 
+2）Leader 服务器需要确保所有的 Follower 服务器能够接收到每一条事务的 Proposal ，并且能将所有已经提交的事务 Proposal 应用到内存数据中。等到 Follower 将所有尚未同步的事务 Proposal 都从 Leader 服务器上同步过来并且应用到内存数据中以后，Leader 才会把该 Follower 加入到真正可用的 Follower 列表中。
+
 
 #### 12 Zab 数据同步过程中，如何处理需要丢弃的 Proposal
 
@@ -222,9 +222,9 @@ Zab协议的核心：定义了事务请求的处理方式
 - acceptedEpoch：Follower 已经接受的 Leader 更改 epoch 的 newEpoch 提议。
 - currentEpoch：当前所处的 Leader 年代
 - lastZxid：history 中最近接收到的Proposal 的 zxid（最大zxid）
-   
+  
 
-#### Zab 的四个阶段
+##### Zab 的四个阶段
 
 **1、选举阶段（Leader Election）**
  节点在一开始都处于选举节点，只要有一个节点得到超过半数节点的票数，它就可以当选准 Leader，只有到达第三个阶段（也就是同步阶段），这个准 Leader 才会成为真正的 Leader。
@@ -293,7 +293,7 @@ Zab协议的核心：定义了事务请求的处理方式
 
 
 
-## 14 协议实现
+#### 14 协议实现
 
 协议的 Java 版本实现跟上面的定义略有不同，选举阶段使用的是 Fast Leader Election（FLE），它包含了步骤1的发现指责。因为FLE会选举拥有最新提议的历史节点作为 Leader，这样就省去了发现最新提议的步骤。
 
@@ -336,8 +336,3 @@ Zab协议的核心：定义了事务请求的处理方式
 > ![img](https:////upload-images.jianshu.io/upload_images/1053629-613f99cec1c34e2e.png?imageMogr2/auto-orient/strip|imageView2/2/w/700/format/webp)
 
 
-
-作者：_Zy
-链接：https://www.jianshu.com/p/2bceacd60b8a
-来源：简书
-著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
